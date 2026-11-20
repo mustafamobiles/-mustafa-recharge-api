@@ -1,0 +1,12 @@
+require("dotenv").config();
+const express=require("express"),cors=require("cors");
+const app=express();
+if(!process.env.JWT_SECRET||process.env.JWT_SECRET.length<32)throw new Error("JWT_SECRET must be at least 32 characters");
+app.use(cors({origin:process.env.CORS_ORIGIN?process.env.CORS_ORIGIN.split(",").map(s=>s.trim()):false}));
+app.use(express.json({limit:"100kb"}));
+app.get("/health",(_req,res)=>res.json({status:"ok",service:"mustafa-mobiles-recharge-api"}));
+app.use("/api/auth",require("./routes/auth"));
+app.use("/api/admin",require("./routes/admin"));
+app.use("/api/retailer",require("./routes/retailer"));
+app.use((err,_req,res,_next)=>{console.error(err);res.status(500).json({error:"Internal server error"});});
+app.listen(Number(process.env.PORT||3000),()=>console.log("API server started"));
